@@ -7,7 +7,11 @@
 
 // Les commandes disponibles sur la liaison série
 enum CommandManagerCommand {
-    SERIAL_COMMAND_TEST_TOGGLE = 't',
+    SERIAL_COMMAND_TOGGLE_SRF_CONTINUOUS_TEST = 'c',
+    SERIAL_COMMAND_TOGGLE_EARS_CONTINUOUS_TEST = 'e',
+    SERIAL_COMMAND_SCAN_I2C = 'i',
+    SERIAL_COMMAND_TEST_SRF_SINGLE_SHOT = 's',
+    SERIAL_COMMAND_TOGGLE_IO_TEST = 't',
 };
 
 /**
@@ -29,11 +33,6 @@ class CommandManager
          * @brief Analyse et traite les commandes qui arrivent sur la liaison série.
          */
         void handleSerialCommand();
-    
-        /**
-         * @brief Gère la commande moteur PWM du lidar
-         */
-        void handleMotorControl();
 
         Stream* serial;
         TestManager* testManager;
