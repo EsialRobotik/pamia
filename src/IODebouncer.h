@@ -50,6 +50,11 @@ class IODebouncer {
          * @return false 
          */
         bool isJustReleased();
+
+        /**
+         * @brief Inidique si le bouton est appuyé ou non, snas débouncer
+         */
+        bool isOn();
     private:
         int pin;
         unsigned long debouncePeriod;

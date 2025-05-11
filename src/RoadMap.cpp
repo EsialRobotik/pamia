@@ -1,7 +1,8 @@
 #include "RoadMap.hpp"
 
-RoadMap::RoadMap(int srfAddress, std::vector<RoadMapItem> items)
+RoadMap::RoadMap(int srfAddress, PAMIA_COLOR color, std::vector<RoadMapItem> items)
 : srfAddress(srfAddress)
+, color(color)
 , items(items)
 , itemsIndex(0)
 {
@@ -21,4 +22,8 @@ RoadMapItem RoadMap::current() {
 
 int RoadMap::getSrfAddress() {
     return srfAddress;
+}
+
+PAMIA_COLOR RoadMap::getColor() {
+    return color;
 }

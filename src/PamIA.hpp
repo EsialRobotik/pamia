@@ -1,6 +1,7 @@
 #ifndef _PAMIA_HPP
 #define _PAMIA_HPP
 
+#include "enums.h"
 #include "PamiHardware.hpp"
 #include "Chrono.hpp"
 #include "AsservManager.hpp"
@@ -8,14 +9,6 @@
 #include "RoadMap.hpp"
 #include <vector>
 #include <Stream.h>
-
-enum PAMIA_STATE {
-    WAIT_TIRETTE_PLUG = 1,
-    WAITING_TIRETTE_UNPLUG = 2,
-    NO_ROAD_MAP = 3,
-    RUN_ROADMAP = 4,
-    END = 5,
-};
 
 class PamIA
 {

@@ -23,9 +23,10 @@ void PamIA::heartBeat() {
       if (pamiHardware->pinTirette->isPressed()) {
         state = WAITING_TIRETTE_UNPLUG;
         serial->println("Tirette inseree, construction roadmap...");
+        PAMIA_COLOR color = pamiHardware->pinCouleur->isOn() ? PAMIA_COLOR::BLUE : PAMIA_COLOR::YELLOW;
         roadMapIndexToUse = -1;
         for (int i=0; i<roadMaps.size(); i++) {
-          if (roadMaps[i].getSrfAddress() == pamiHardware->srf08->getAddress()) {
+          if (roadMaps[i].getSrfAddress() == pamiHardware->srf08->getAddress() && roadMaps[i].getColor() == color) {
             roadMapIndexToUse = i;
             break;
           }

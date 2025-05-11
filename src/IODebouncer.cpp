@@ -28,6 +28,10 @@ bool IODebouncer::isJustReleased() {
     return isJust(isReleased(), &previousReleased);
 }
 
+bool IODebouncer::isOn() {
+    return digitalRead(pin);
+}
+
 bool IODebouncer::is(bool actualValue, unsigned long * last) {
     if (actualValue) {
         if (*last > 0) {

@@ -2,12 +2,22 @@
 Destination du code : ESP32 C3 Zero selon l'implantation électronique suivante : https://github.com/EsialRobotik/Electronique/blob/master/AsservPami/asserv-pami-board.pdf
 
 # Utilisation de la PAMI
-A la mise sous tension, la PAMI attend l'insertion de la tirette.
-A l'insertion de la tirette, la PAMI charge la liste d'instruction qui correspond à son numéro, déterminé par le SRF08 qu'elle contient.
-Au retrait de la tirette, un compte à rebours de 85 secondes est lancé et les oreilles commencent à osciller.
-Au bout de compte à rebours, la PAMI exécute sa liste d'instruction.
-Si la liste d'instruction n'est pas terminé au bout de 15 secondes, l'exécution de la liste s'interromp et la PAMI s'immobilise.
-Les oreilles continuent à osciller jusqu'à la mise hors tension de la PAMI
+Mettre la PAMI hors tension.
+Sélectionner la couleur appropriée avec l'interrupteur dédié.
+Mettre la PAMI sous tension sans la tirette.
+Attendre 2 secondes.
+Insérer la tirette.
+La PAMI charge la liste d'instruction correspondant au SRF08 qu'elle contient et à la couleur sélectionnée.
+Au retrait de la tirette, la PAMI exécute sa liste d'instruction.
+Si la liste d'instruction n'est pas terminé au bout du temps réglementaire, l'exécution de la liste s'interrompt et la PAMI s'immobilise.
+
+# Instruction disponibles
+
+CELEBRATE : faire osciller les oreilles
+GO_TO : aller à l'emplacement indiqué
+WAIT : attendre x millisecondes
+
+La liste des instruction est à définir dans la variable `roadMaps` de `main.cpp`, en ajustant l'exemple fourni.
 
 # Liaison série avec un PC
 Il est possible d'envoyer des commandes à la PAMI à travers la liaison série du connecteur USB-C relié à un oridnateur.
