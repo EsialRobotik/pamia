@@ -62,3 +62,7 @@ void SRF08::reset() {
 int SRF08::getAddress() {
     return address;
 }
+
+void SRF08::setAddress(int address) {
+    this->address = address;
+}

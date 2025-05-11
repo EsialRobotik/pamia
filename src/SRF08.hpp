@@ -28,6 +28,7 @@ class SRF08
         unsigned int getLastMeasureCentimeter();
         void reset();
         int getAddress();
+        void setAddress(int address);
     
     private:
         int address;
