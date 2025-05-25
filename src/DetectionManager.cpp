@@ -11,6 +11,9 @@ int DetectionManager::getObstacleDistance() {
 }
 
 void DetectionManager::heartBeat() {
+    if (pamiHardware->srf08->getAddress() == 0) {
+        return;
+    }
     if (pamiHardware->srf08->checkMeasureResponse()) {
         lastDistance = pamiHardware->srf08->getLastMeasureCentimeter();
         pamiHardware->srf08->triggerMeasure();
