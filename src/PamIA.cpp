@@ -97,6 +97,15 @@ bool PamIA::nextCommand() {
       asservManager->goTo(rmi.x, rmi.y);
       lastCommandStartTime = millis();
       break;
+    case ROADMAP_COMMAND::GO:
+      serial->print("nextCommand() : go ");
+      serial->print(rmi.x);
+      serial->print(" avec detection ");
+      serial->print(rmi.detectionThreshold);
+      serial->println("cm");
+      asservManager->go(rmi.x);
+      lastCommandStartTime = millis();
+      break;
     case ROADMAP_COMMAND::WAIT:
       serial->print("nextCommand() : attente ");
       serial->print(rmi.waitTime);
@@ -112,6 +121,10 @@ bool PamIA::nextCommand() {
       chronoCelebration.setPeriod(rmi.waitTime);
       chronoCelebration.start();
       lastCommandStartTime = millis();
+    case ROADMAP_COMMAND::WAIT_TIRETTE_UNPLUG:
+      serial->println("nextClommand() : wait tirette unplug");
+      lastCommandStartTime = millis();
+      break;
   }
 
   return true;
@@ -147,6 +160,8 @@ bool PamIA::currentCommandHeartBeat() {
         }
       }
       return false;
+    case ROADMAP_COMMAND::GO:
+      return asservManager->asservIdle();
     case ROADMAP_COMMAND::WAIT:
       if (millis() > lastCommandStartTime + rmi.waitTime) {
         serial->println("currentCommandHeartBeat() : attente terminee");
@@ -155,6 +170,9 @@ bool PamIA::currentCommandHeartBeat() {
       return false;
     case ROADMAP_COMMAND::CELEBRATE:
       return true;
+      break;
+    case ROADMAP_COMMAND::WAIT_TIRETTE_UNPLUG:
+      return pamiHardware->pinTirette->isJustReleased();
       break;
   }
   return true;
