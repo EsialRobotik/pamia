@@ -1,4 +1,4 @@
-#include "commandmanager.hpp"
+#include "CommandManager.hpp"
 
 CommandManager::CommandManager(Stream* serial, TestManager* testManager)
   : serial(serial)
