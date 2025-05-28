@@ -111,9 +111,9 @@ bool PamIA::nextCommand() {
       serial->print("nextCommand() : set position ");
       serial->print(rmi.x);
       serial->print(";");
-      serial->println(rmi.y);
+      serial->print(rmi.y);
       serial->print(";");
-      serial->println(rmi.angle);
+      serial->println(rmi.angle, 8);
       asservManager->setPosition(rmi.x, rmi.y, rmi.angle);
       lastCommandStartTime = millis();
       break;

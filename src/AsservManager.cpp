@@ -19,7 +19,7 @@ void AsservManager::setPosition(int x, int y, float rad) {
     asservSerial->print('#');
     asservSerial->print(y);
     asservSerial->print('#');
-    asservSerial->println(rad);
+    asservSerial->println(rad, 8);
     asservSerial->flush();
 }
 
