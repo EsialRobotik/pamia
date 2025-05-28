@@ -93,7 +93,7 @@ bool PamIA::nextCommand() {
       serial->print(";");
       serial->print(rmi.y);
       serial->print(" avec detection ");
-      serial->print(rmi.detectionThreshold);
+      serial->print(rmi.detectionThresholdOrPeriod);
       serial->println("cm");
       asservManager->goTo(rmi.x, rmi.y);
       lastCommandStartTime = millis();
@@ -102,24 +102,34 @@ bool PamIA::nextCommand() {
       serial->print("nextCommand() : go ");
       serial->print(rmi.x);
       serial->print(" avec detection ");
-      serial->print(rmi.detectionThreshold);
+      serial->print(rmi.detectionThresholdOrPeriod);
       serial->println("cm");
       asservManager->go(rmi.x);
       lastCommandStartTime = millis();
       break;
+    case ROADMAP_COMMAND::SET_POSITION:
+      serial->print("nextCommand() : set position ");
+      serial->print(rmi.x);
+      serial->print(";");
+      serial->println(rmi.y);
+      serial->print(";");
+      serial->println(rmi.angle);
+      asservManager->setPosition(rmi.x, rmi.y, rmi.angle);
+      lastCommandStartTime = millis();
+      break;
     case ROADMAP_COMMAND::WAIT:
       serial->print("nextCommand() : attente ");
-      serial->print(rmi.waitTime);
+      serial->print(rmi.x);
       serial->println("ms");
       lastCommandStartTime = millis();
       break;
     case ROADMAP_COMMAND::CELEBRATE:
       serial->print("nextCommand() : celebrate, period ");
-      serial->print(rmi.waitTime);
+      serial->print(rmi.detectionThresholdOrPeriod);
       serial->println("ms");
       celebrateServoMin = rmi.x;
       celebrateServoMax = rmi.y;
-      chronoCelebration.setPeriod(rmi.waitTime);
+      chronoCelebration.setPeriod((unsigned long) rmi.detectionThresholdOrPeriod);
       chronoCelebration.start();
       lastCommandStartTime = millis();
     case ROADMAP_COMMAND::WAIT_TIRETTE_UNPLUG:
@@ -144,7 +154,7 @@ bool PamIA::currentCommandHeartBeat() {
         return true;
       }
 
-      if (detectionManager->getObstacleDistance() < rmi.detectionThreshold) {
+      if (detectionManager->getObstacleDistance() < rmi.detectionThresholdOrPeriod) {
         if (!obstacleDetected) {
           serial->println("currentCommandHeartBeat() : obstacle detecte, arret urgence");
           asservManager->emergencyStop();
@@ -163,8 +173,10 @@ bool PamIA::currentCommandHeartBeat() {
       return false;
     case ROADMAP_COMMAND::GO:
       return asservManager->asservIdle();
+    case ROADMAP_COMMAND::SET_POSITION:
+      return millis() > (lastCommandStartTime + 5); // On laisse 5 ms à l'asserv pour assimiler la position 
     case ROADMAP_COMMAND::WAIT:
-      if (millis() > lastCommandStartTime + rmi.waitTime) {
+      if (millis() > lastCommandStartTime + (unsigned long) rmi.detectionThresholdOrPeriod) {
         serial->println("currentCommandHeartBeat() : attente terminee");
         return true;
       }

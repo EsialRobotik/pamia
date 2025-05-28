@@ -17,6 +17,7 @@ enum PAMIA_COLOR {
 enum ROADMAP_COMMAND {
     GO,
     GO_TO,
+    SET_POSITION,
     WAIT,
     CELEBRATE,
     WAIT_TIRETTE_UNPLUG,

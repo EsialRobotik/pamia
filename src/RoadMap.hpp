@@ -6,10 +6,10 @@
 
 struct RoadMapItem {
     ROADMAP_COMMAND command;
-    unsigned long waitTime;
     int x;
     int y;
-    int detectionThreshold; // Valeur en dessous de laquelle on considère qu'il y a un obstacle et qu'on doit s'arrêter
+    float angle;
+    int detectionThresholdOrPeriod; // Valeur en dessous de laquelle on considère qu'il y a un obstacle et qu'on doit s'arrêter ou alors période d'oscillation des oreilles
 };
 
 class RoadMap
