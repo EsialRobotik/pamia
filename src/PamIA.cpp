@@ -51,6 +51,7 @@ void PamIA::heartBeat() {
           serial->println("Tirette retiree, chrono deplacement...");
           state = RUN_ROADMAP;
           chronoStopMoving.start();
+          nextCommand(); // Amorçage de la roadmap
         }
       }
       break;

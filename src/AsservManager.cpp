@@ -13,7 +13,7 @@ AsservManager::AsservManager(Stream* asservSerial, Stream* debugSerial)
 {
 }
 
-void setPosition(int x, int y, float rad) {
+void AsservManager::setPosition(int x, int y, float rad) {
     asservSerial->print('P');
     asservSerial->print(x);
     asservSerial->print('#');
