@@ -22,7 +22,8 @@ void PamIA::heartBeat() {
     case WAIT_TIRETTE_PLUG:
       if (pamiHardware->pinTirette->isPressed()) {
         state = WAITING_TIRETTE_UNPLUG;
-        serial->println("Tirette inseree, construction roadmap...");
+        serial->print(millis());
+        serial->println(" tirette inseree, construction roadmap...");
         PAMIA_COLOR color = pamiHardware->pinCouleur->isOn() ? PAMIA_COLOR::BLUE : PAMIA_COLOR::YELLOW;
         roadMapIndexToUse = -1;
         for (int i=0; i<roadMaps.size(); i++) {
@@ -32,10 +33,12 @@ void PamIA::heartBeat() {
           }
         }
         if (roadMapIndexToUse == -1) {
-          serial->print("Pas de roadmap pour le srf a l'adresse ");
+          serial->print(millis());
+          serial->print(" pas de roadmap pour le srf a l'adresse ");
           serial->println(pamiHardware->srf08->getAddress());
         } else {
-          serial->print("Utilisation roadmap n. ");
+          serial->print(millis());
+          serial->print(" utilisation roadmap n. ");
           serial->print(roadMapIndexToUse);
           serial->print(" pour le srf a l'adresse ");
           serial->println(pamiHardware->srf08->getAddress());
@@ -45,10 +48,12 @@ void PamIA::heartBeat() {
     case WAITING_TIRETTE_UNPLUG:
       if (pamiHardware->pinTirette->isReleased()) {
         if (roadMapIndexToUse == -1) {
-          serial->println("No roadmap found !");
+          serial->print(millis());
+          serial->println(" no roadmap found !");
           state = NO_ROAD_MAP;
         } else {
-          serial->println("Tirette retiree, chrono deplacement...");
+          serial->print(millis());
+          serial->println(" tirette retiree, chrono deplacement...");
           state = RUN_ROADMAP;
           chronoStopMoving.start();
           nextCommand(); // Amorçage de la roadmap
@@ -57,8 +62,13 @@ void PamIA::heartBeat() {
       break;
     case RUN_ROADMAP:
       // Si le chrono est terminé ou que la liste des commandes à exécuter est terminée : stop
-      if (chronoStopMoving.isElapsed() || (currentCommandHeartBeat() && !nextCommand())) {
-        serial->println("Chrono match termine");
+      if (chronoStopMoving.isElapsed()) {
+        serial->print(millis());
+        serial->println(" chrono match termine");
+        state = END;
+      } else if (currentCommandHeartBeat() && !nextCommand()) {
+        serial->print(millis());
+        serial->println(" road map epuisee");
         state = END;
       }
       break;
@@ -75,20 +85,23 @@ void PamIA::heartBeat() {
   }
 
   if (chronoStateTicker.triggered()) {
-    serial->print("Etat : ");
+    serial->print(millis());
+    serial->print(" etat : ");
     serial->println(state);
   }
 }
 
 bool PamIA::nextCommand() {
   if (!roadMaps[roadMapIndexToUse].hasNextItem()) {
-    serial->println("nextCommand() : no more command");
+    serial->print(millis());
+    serial->println(" nextCommand() : no more command");
     return false;
   }
   RoadMapItem rmi = roadMaps[roadMapIndexToUse].getNextItem();
   switch (rmi.command) {
     case ROADMAP_COMMAND::GO_TO:
-      serial->print("nextCommand() : goto ");
+      serial->print(millis());
+      serial->print(" nextCommand() : goto ");
       serial->print(rmi.x);
       serial->print(";");
       serial->print(rmi.y);
@@ -99,7 +112,8 @@ bool PamIA::nextCommand() {
       lastCommandStartTime = millis();
       break;
     case ROADMAP_COMMAND::GO:
-      serial->print("nextCommand() : go ");
+      serial->print(millis());
+      serial->print(" nextCommand() : go ");
       serial->print(rmi.x);
       serial->print(" avec detection ");
       serial->print(rmi.detectionThresholdOrPeriod);
@@ -108,7 +122,8 @@ bool PamIA::nextCommand() {
       lastCommandStartTime = millis();
       break;
     case ROADMAP_COMMAND::SET_POSITION:
-      serial->print("nextCommand() : set position ");
+      serial->print(millis());  
+      serial->print(" nextCommand() : set position ");
       serial->print(rmi.x);
       serial->print(";");
       serial->print(rmi.y);
@@ -117,14 +132,25 @@ bool PamIA::nextCommand() {
       asservManager->setPosition(rmi.x, rmi.y, rmi.angle);
       lastCommandStartTime = millis();
       break;
+    case ROADMAP_COMMAND::FACE:
+      serial->print(millis());
+      serial->print(" nextCommand() : face ");
+      serial->print(rmi.x);
+      serial->print(";");
+      serial->println(rmi.y);
+      asservManager->face(rmi.x, rmi.y);
+      lastCommandStartTime = millis();
+      break;
     case ROADMAP_COMMAND::WAIT:
-      serial->print("nextCommand() : attente ");
+      serial->print(millis());
+      serial->print(" nextCommand() : attente ");
       serial->print(rmi.x);
       serial->println("ms");
       lastCommandStartTime = millis();
       break;
     case ROADMAP_COMMAND::CELEBRATE:
-      serial->print("nextCommand() : celebrate, period ");
+      serial->print(millis());
+      serial->print(" nextCommand() : celebrate, period ");
       serial->print(rmi.detectionThresholdOrPeriod);
       serial->println("ms");
       celebrateServoMin = rmi.x;
@@ -132,8 +158,10 @@ bool PamIA::nextCommand() {
       chronoCelebration.setPeriod((unsigned long) rmi.detectionThresholdOrPeriod);
       chronoCelebration.start();
       lastCommandStartTime = millis();
+      break;
     case ROADMAP_COMMAND::WAIT_TIRETTE_UNPLUG:
-      serial->println("nextClommand() : wait tirette unplug");
+      serial->print(millis());
+      serial->println(" nextClommand() : wait tirette unplug");
       lastCommandStartTime = millis();
       break;
   }
@@ -149,20 +177,23 @@ bool PamIA::currentCommandHeartBeat() {
       // - on est pas bloqué
       // - le dernier tick d'asserv a été reçu après l'envoi/la reprise de la commande
       // - l'asserv indique qu'elles est idle
-      if (!obstacleDetected && asservManager->getLastData().time > lastCommandStartTime && asservManager->asservIdle()) {
-        serial->println("currentCommandHeartBeat() : goto termine");
+      if (!obstacleDetected && (asservManager->getLastData().time > lastCommandStartTime) && asservManager->asservIdle()) {
+        serial->print(millis());
+        serial->println(" currentCommandHeartBeat() : goto termine");
         return true;
       }
 
       if (detectionManager->getObstacleDistance() < rmi.detectionThresholdOrPeriod) {
         if (!obstacleDetected) {
-          serial->println("currentCommandHeartBeat() : obstacle detecte, arret urgence");
+          serial->print(millis());
+          serial->println(" currentCommandHeartBeat() : obstacle detecte, arret urgence");
           asservManager->emergencyStop();
           obstacleDetected = true;
         }
       } else {
         if (obstacleDetected) {
-          serial->println("currentCommandHeartBeat() : obstacle parti, reprise goto");
+          serial->print(millis());
+          serial->println(" currentCommandHeartBeat() : obstacle parti, reprise goto");
           obstacleDetected = false;
           asservManager->emergencyReset();
           delay(20);
@@ -172,12 +203,30 @@ bool PamIA::currentCommandHeartBeat() {
       }
       return false;
     case ROADMAP_COMMAND::GO:
-      return asservManager->asservIdle();
+      if ((asservManager->getLastData().time > lastCommandStartTime) && asservManager->asservIdle()) {
+        serial->print(millis());
+        serial->println(" currentCommandHeartBeat() : go termine");
+        return true;
+      }
+      return false;
+    case ROADMAP_COMMAND::FACE:
+      if ((asservManager->getLastData().time > lastCommandStartTime) && asservManager->asservIdle()) {
+        serial->print(millis());
+        serial->println(" currentCommandHeartBeat() : face termine");
+        return true;
+      }
+      return false;
     case ROADMAP_COMMAND::SET_POSITION:
-      return millis() > (lastCommandStartTime + 5); // On laisse 5 ms à l'asserv pour assimiler la position 
+      if ((asservManager->getLastData().time > lastCommandStartTime)) { // On attend que l'asserv nous aquiette la nouvelle position
+        serial->print(millis());
+        serial->println(" currentCommandHeartBeat() : set position termine");
+        return true;
+      }
+      return false ;
     case ROADMAP_COMMAND::WAIT:
-      if (millis() > lastCommandStartTime + (unsigned long) rmi.detectionThresholdOrPeriod) {
-        serial->println("currentCommandHeartBeat() : attente terminee");
+      if (millis() > (lastCommandStartTime + ((unsigned long) rmi.x))) {
+        serial->print(millis());
+        serial->println(" currentCommandHeartBeat() : attente terminee");
         return true;
       }
       return false;
@@ -185,7 +234,12 @@ bool PamIA::currentCommandHeartBeat() {
       return true;
       break;
     case ROADMAP_COMMAND::WAIT_TIRETTE_UNPLUG:
-      return pamiHardware->pinTirette->isJustReleased();
+      if (pamiHardware->pinTirette->isJustReleased()) {
+        serial->print(millis());
+        serial->println(" currentCommandHeartBeat() : tirette retiree");
+        return true;
+      }
+      return false;
       break;
   }
   return true;

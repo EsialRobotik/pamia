@@ -19,7 +19,7 @@ void AsservManager::setPosition(int x, int y, float rad) {
     asservSerial->print('#');
     asservSerial->print(y);
     asservSerial->print('#');
-    asservSerial->println(rad, 8);
+    asservSerial->println(rad, 6);
     asservSerial->flush();
 }
 
@@ -111,7 +111,8 @@ void AsservManager::heartBeat() {
         ad.time = millis();
         // Débug de l'asserv que si les valeurs changent, sinon ça spam
         if (ad != asservData) {
-            debugSerial->print("asserv : x");
+            debugSerial->print(millis());
+            debugSerial->print(" asserv : x");
             debugSerial->print(ad.x);
             debugSerial->print("; y");
             debugSerial->print(ad.y);
