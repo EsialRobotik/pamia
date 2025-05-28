@@ -13,6 +13,16 @@ AsservManager::AsservManager(Stream* asservSerial, Stream* debugSerial)
 {
 }
 
+void setPosition(int x, int y, float rad) {
+    asservSerial->print('P');
+    asservSerial->print(x);
+    asservSerial->print('#');
+    asservSerial->print(y);
+    asservSerial->print('#');
+    asservSerial->println(rad);
+    asservSerial->flush();
+}
+
 void AsservManager::goTo(int x, int y) {
     asservSerial->print('g');
     asservSerial->print(x);
@@ -29,17 +39,35 @@ void AsservManager::face(int x, int y) {
     asservSerial->flush();
 }
 
+void AsservManager::goToBack(int x, int y) {
+    asservSerial->print('b');
+    asservSerial->print(x);
+    asservSerial->print('#');
+    asservSerial->println(y);
+    asservSerial->flush();
+}
+
+void AsservManager::goToChain(int x, int y) {
+    asservSerial->print('e');
+    asservSerial->print(x);
+    asservSerial->print('#');
+    asservSerial->println(y);
+    asservSerial->flush();
+}
+
 void AsservManager::go(int distanceMm) {
     asservSerial->print('v');
     asservSerial->println(distanceMm);
     asservSerial->flush();
 }
 
-void AsservManager::turn(float rad) {
+void AsservManager::turn(int degrees) {
     asservSerial->print('t');
-    asservSerial->println(rad);
+    asservSerial->println(degrees);
     asservSerial->flush();
 }
+
+
 
 bool AsservManager::asservIdle() {
     return asservData.time > 0 && asservData.status == AsservStatus::IDLE;

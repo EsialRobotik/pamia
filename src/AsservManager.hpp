@@ -25,6 +25,15 @@ class AsservManager {
     public:
         AsservManager(Stream* asservSerial, Stream* debugSerial);
         /**
+         * @brief Définit la position de la PAMI
+         * 
+         * @param x Position en mm sur l'axe X
+         * @param y Position en mm sur l'axe Y
+         * @param rad Angle en radians            
+         */
+        void setPosition(int x, int y, float rad);
+
+        /**
          * @brief Va aux coordonnées indiquées
          */
         void goTo(int x, int y);
@@ -35,6 +44,16 @@ class AsservManager {
         void face(int x, int y);
 
         /**
+         * @brief Va aux coordonnées indiquées en marche arrière
+         */
+        void goToBack(int x, int y);
+
+        /**
+         * @brief Va aux coordonnées indiquées en enchainant les mouvements
+         */
+        void goToChain(int x, int y);
+
+        /**
          * @brief Avance en ligne droit de la distance indiquée en mm
          */
         void go(int distanceMm);
@@ -42,7 +61,7 @@ class AsservManager {
         /**
          * @brief Tourne de l'angle indiqué en radians
          */
-        void turn(float rad);
+        void turn(int degrees);
 
         /**
          * @brief Arrêt d'urgence
