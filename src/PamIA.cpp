@@ -64,11 +64,13 @@ void PamIA::heartBeat() {
       // Si le chrono est terminé ou que la liste des commandes à exécuter est terminée : stop
       if (chronoStopMoving.isElapsed()) {
         serial->print(millis());
-        serial->println(" chrono match termine");
+        serial->println(" chrono match termine, envoi arret urgence");
+        asservManager->emergencyStop();
         state = END;
       } else if (currentCommandHeartBeat() && !nextCommand()) {
         serial->print(millis());
-        serial->println(" road map epuisee");
+        serial->println(" road map epuisee, envoi arret urgence");
+        asservManager->emergencyStop();
         state = END;
       }
       break;
