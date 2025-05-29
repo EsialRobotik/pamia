@@ -28,6 +28,11 @@ class PamIA
          */
         void heartBeat();
 
+        /**
+         * @brief Arrête de bouger les oreilles
+         */
+        void stopCelebration();
+
     private:
         Stream* serial;
         PamiHardWare* pamiHardware;

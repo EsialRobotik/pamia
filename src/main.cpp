@@ -137,10 +137,10 @@ Servo servo1;
 
 PamiHardWare pamiHardware(&btnTirette, &btnCouleur, &btnGpio1, &btnGpio2, &srf08, &servo1);
 TestManager testManager(&Serial, &pamiHardware);
-CommandManager commandManager(&Serial, &testManager);
 AsservManager asservManager(&Serial0, &Serial);
 DetectionManager detectionManager(&pamiHardware);
 PamIA pamiA(&Serial, &pamiHardware, &asservManager, &detectionManager, roadMaps, STOP_MOVING_MS);
+CommandManager commandManager(&Serial, &testManager, &pamiA);
 
 void setup() {
   Serial.begin(UART_PC_SPEED);

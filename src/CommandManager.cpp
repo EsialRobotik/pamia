@@ -1,8 +1,9 @@
 #include "CommandManager.hpp"
 
-CommandManager::CommandManager(Stream* serial, TestManager* testManager)
+CommandManager::CommandManager(Stream* serial, TestManager* testManager, PamIA* pamIA)
   : serial(serial)
   , testManager(testManager)
+  , pamIA(pamIA)
 {
 }
 
@@ -43,6 +44,10 @@ void CommandManager::handleSerialCommand() {
           Serial.println(i);
         }
       }
+      break;
+    case CommandManagerCommand::SERIAL_COMMAND_STOP_CELEBRATION:
+      pamIA->stopCelebration();
+      serial->println("Stop celebration OK");
       break;
   }
 }

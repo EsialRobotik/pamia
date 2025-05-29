@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include <Stream.h>
 #include "TestManager.hpp"
+#include "PamIA.hpp"
 
 // Les commandes disponibles sur la liaison série
 enum CommandManagerCommand {
@@ -12,6 +13,7 @@ enum CommandManagerCommand {
     SERIAL_COMMAND_SCAN_I2C = 'i',
     SERIAL_COMMAND_TEST_SRF_SINGLE_SHOT = 's',
     SERIAL_COMMAND_TOGGLE_IO_TEST = 't',
+    SERIAL_COMMAND_STOP_CELEBRATION = 'x',
 };
 
 /**
@@ -20,7 +22,7 @@ enum CommandManagerCommand {
 class CommandManager
 {
     public:
-        CommandManager(Stream* serial, TestManager* testManager);
+        CommandManager(Stream* serial, TestManager* testManager, PamIA* pamIA);
 
         /**
          * @brief Méthode à appeler régulièrement pour gérer les commandes reçues sur al liaison série
@@ -36,6 +38,7 @@ class CommandManager
 
         Stream* serial;
         TestManager* testManager;
+        PamIA* pamIA;
 };
 
 #endif

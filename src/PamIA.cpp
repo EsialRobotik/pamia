@@ -246,3 +246,7 @@ bool PamIA::currentCommandHeartBeat() {
   }
   return true;
 }
+
+void PamIA::stopCelebration() {
+  chronoCelebration.reset();
+}
