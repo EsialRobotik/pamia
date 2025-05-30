@@ -12,6 +12,7 @@ PamIA::PamIA(Stream* serial, PamiHardWare* pamiHardware, AsservManager* asservMa
 , chronoCelebration(Chrono(0))
 , obstacleDetected(false)
 , lastCommandStartTime(0)
+, matchStartTime(0)
 , celebrateServoMin(0)
 , celebrateServoMax(0)
 {
@@ -56,6 +57,7 @@ void PamIA::heartBeat() {
           serial->println(" tirette retiree, chrono deplacement...");
           state = RUN_ROADMAP;
           chronoStopMoving.start();
+          matchStartTime = millis();
           nextCommand(); // Amorçage de la roadmap
         }
       }
@@ -64,14 +66,16 @@ void PamIA::heartBeat() {
       // Si le chrono est terminé ou que la liste des commandes à exécuter est terminée : stop
       if (chronoStopMoving.isElapsed()) {
         serial->print(millis());
-        serial->println(" chrono match termine, envoi arret urgence");
+        serial->println(" chrono match termine, envoi arret urgence + celebration");
         asservManager->emergencyStop();
         state = END;
+        startCelebration(10, 170, 1000);
       } else if (currentCommandHeartBeat() && !nextCommand()) {
         serial->print(millis());
-        serial->println(" road map epuisee, envoi arret urgence");
+        serial->println(" road map epuisee, envoi arret urgence + celebration");
         asservManager->emergencyStop();
         state = END;
+        startCelebration(10, 170, 1000);
       }
       break;
     case END:
@@ -155,16 +159,24 @@ bool PamIA::nextCommand() {
       serial->print(" nextCommand() : celebrate, period ");
       serial->print(rmi.detectionThresholdOrPeriod);
       serial->println("ms");
-      celebrateServoMin = rmi.x;
-      celebrateServoMax = rmi.y;
-      chronoCelebration.setPeriod((unsigned long) rmi.detectionThresholdOrPeriod);
-      chronoCelebration.start();
+      startCelebration(rmi.x, rmi.y, (unsigned long) rmi.detectionThresholdOrPeriod);
+      lastCommandStartTime = millis();
+      break;
+    case ROADMAP_COMMAND::STOP_CELEBRATE:
+      serial->print(millis());
+      serial->print(" nextCommand() : stop celebrate");
+      chronoCelebration.reset();
       lastCommandStartTime = millis();
       break;
     case ROADMAP_COMMAND::WAIT_TIRETTE_UNPLUG:
       serial->print(millis());
       serial->println(" nextClommand() : wait tirette unplug");
       lastCommandStartTime = millis();
+      break;
+    case ROADMAP_COMMAND::SYNC_TO_MATCH_TIME:
+      serial->println(" nextClommand() : sync to match time ");
+      serial->print(rmi.x);
+      serial->println("ms");
       break;
   }
 
@@ -233,6 +245,7 @@ bool PamIA::currentCommandHeartBeat() {
       }
       return false;
     case ROADMAP_COMMAND::CELEBRATE:
+    case ROADMAP_COMMAND::STOP_CELEBRATE:
       return true;
       break;
     case ROADMAP_COMMAND::WAIT_TIRETTE_UNPLUG:
@@ -243,8 +256,18 @@ bool PamIA::currentCommandHeartBeat() {
       }
       return false;
       break;
+    case ROADMAP_COMMAND::SYNC_TO_MATCH_TIME:
+      return millis() > (matchStartTime + (unsigned long) rmi.x);
+      break;
   }
   return true;
+}
+
+void PamIA::startCelebration(int servoMin, int servoMax, unsigned long period) {
+      celebrateServoMin = servoMin;
+      celebrateServoMax = servoMax;
+      chronoCelebration.setPeriod(period);
+      chronoCelebration.start();
 }
 
 void PamIA::stopCelebration() {

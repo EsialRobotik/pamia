@@ -29,6 +29,11 @@ class PamIA
         void heartBeat();
 
         /**
+         * @brief Commence à faire ociller les oreilles 
+         */
+        void startCelebration(int servoMin, int servoMax, unsigned long period);
+
+        /**
          * @brief Arrête de bouger les oreilles
          */
         void stopCelebration();
@@ -46,6 +51,7 @@ class PamIA
         Chrono chronoCelebration;
         bool obstacleDetected;
         unsigned long lastCommandStartTime;
+        unsigned long matchStartTime;
         int celebrateServoMin;
         int celebrateServoMax;
 
