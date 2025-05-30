@@ -93,9 +93,15 @@ class AsservManager {
          * 
          */
         void heartBeat();
+
+        /**
+         * @brief Active ou désactive l'envoi de la plupart des commandes à l'asserv
+         */
+        void enableAsserv(bool enable);
     private:
         Stream* asservSerial;
         Stream* debugSerial;
         AsservData asservData;
+        bool enabled;
 };
 #endif

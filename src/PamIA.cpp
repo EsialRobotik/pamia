@@ -146,6 +146,13 @@ bool PamIA::nextCommand() {
       serial->println(rmi.y);
       asservManager->face(rmi.x, rmi.y);
       lastCommandStartTime = millis();
+    break;
+    case ROADMAP_COMMAND::TURN:
+      serial->print(millis());
+      serial->print(" nextCommand() : turn ");
+      serial->print(rmi.x);
+      asservManager->turn(rmi.x);
+      lastCommandStartTime = millis();
       break;
     case ROADMAP_COMMAND::WAIT:
       serial->print(millis());
@@ -177,6 +184,18 @@ bool PamIA::nextCommand() {
       serial->println(" nextClommand() : sync to match time ");
       serial->print(rmi.x);
       serial->println("ms");
+      break;
+    case ROADMAP_COMMAND::DISABLE_ASSERV:
+      if (rmi.x == pamiHardware->srf08->getAddress()) {
+        serial->println(" nextClommand() : disable asserv ");
+        asservManager->enableAsserv(false);
+      }
+      break;
+    case ROADMAP_COMMAND::ENABLE_ASSERV:
+      if (rmi.x == pamiHardware->srf08->getAddress()) {
+        serial->println(" nextClommand() : enable asserv ");
+        asservManager->enableAsserv(true);
+      }
       break;
   }
 
@@ -230,6 +249,13 @@ bool PamIA::currentCommandHeartBeat() {
         return true;
       }
       return false;
+    case ROADMAP_COMMAND::TURN:
+      if ((asservManager->getLastData().time > lastCommandStartTime) && asservManager->asservIdle()) {
+        serial->print(millis());
+        serial->println(" currentCommandHeartBeat() : turn termine");
+        return true;
+      }
+      return false;
     case ROADMAP_COMMAND::SET_POSITION:
       if ((asservManager->getLastData().time > lastCommandStartTime)) { // On attend que l'asserv nous aquiette la nouvelle position
         serial->print(millis());
@@ -246,8 +272,11 @@ bool PamIA::currentCommandHeartBeat() {
       return false;
     case ROADMAP_COMMAND::CELEBRATE:
     case ROADMAP_COMMAND::STOP_CELEBRATE:
+    case ROADMAP_COMMAND::ENABLE_ASSERV:
+    case ROADMAP_COMMAND::DISABLE_ASSERV:
       return true;
       break;
+    
     case ROADMAP_COMMAND::WAIT_TIRETTE_UNPLUG:
       if (pamiHardware->pinTirette->isJustReleased()) {
         serial->print(millis());

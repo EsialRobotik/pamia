@@ -10,10 +10,14 @@ AsservManager::AsservManager(Stream* asservSerial, Stream* debugSerial)
 : asservSerial(asservSerial)
 , debugSerial(debugSerial)
 , asservData({0,0,0.,0,0,0})
+, enabled(true)
 {
 }
 
 void AsservManager::setPosition(int x, int y, float rad) {
+    if (!enabled) {
+        return;
+    }
     asservSerial->print('P');
     asservSerial->print(x);
     asservSerial->print('#');
@@ -24,6 +28,9 @@ void AsservManager::setPosition(int x, int y, float rad) {
 }
 
 void AsservManager::goTo(int x, int y) {
+    if (!enabled) {
+        return;
+    }
     asservSerial->print('g');
     asservSerial->print(x);
     asservSerial->print('#');
@@ -32,6 +39,9 @@ void AsservManager::goTo(int x, int y) {
 }
 
 void AsservManager::face(int x, int y) {
+    if (!enabled) {
+        return;
+    }
     asservSerial->print('f');
     asservSerial->print(x);
     asservSerial->print('#');
@@ -40,6 +50,9 @@ void AsservManager::face(int x, int y) {
 }
 
 void AsservManager::goToBack(int x, int y) {
+    if (!enabled) {
+        return;
+    }
     asservSerial->print('b');
     asservSerial->print(x);
     asservSerial->print('#');
@@ -48,6 +61,9 @@ void AsservManager::goToBack(int x, int y) {
 }
 
 void AsservManager::goToChain(int x, int y) {
+    if (!enabled) {
+        return;
+    }
     asservSerial->print('e');
     asservSerial->print(x);
     asservSerial->print('#');
@@ -56,12 +72,18 @@ void AsservManager::goToChain(int x, int y) {
 }
 
 void AsservManager::go(int distanceMm) {
+    if (!enabled) {
+        return;
+    }
     asservSerial->print('v');
     asservSerial->println(distanceMm);
     asservSerial->flush();
 }
 
 void AsservManager::turn(int degrees) {
+    if (!enabled) {
+        return;
+    }
     asservSerial->print('t');
     asservSerial->println(degrees);
     asservSerial->flush();
@@ -70,7 +92,7 @@ void AsservManager::turn(int degrees) {
 
 
 bool AsservManager::asservIdle() {
-    return asservData.time > 0 && asservData.status == AsservStatus::IDLE;
+    return !enabled || asservData.time > 0 && asservData.status == AsservStatus::IDLE;
 }
 
 void AsservManager::emergencyStop() {
@@ -125,4 +147,8 @@ void AsservManager::heartBeat() {
         }
         asservData = ad;
     }
+}
+
+void AsservManager::enableAsserv(bool enable) {
+    this->enabled = enable;
 }
